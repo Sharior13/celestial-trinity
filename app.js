@@ -16,6 +16,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "html")));
 app.use(express.static(path.join(__dirname, "css")));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
+app.use("/static", express.static(path.join(__dirname, "css")));
 
 app.use("/", routermain);
 app.use("/api", routerapi);

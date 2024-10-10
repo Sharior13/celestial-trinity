@@ -3,8 +3,10 @@ const express = require("express");
 const app = express.Router();
 const path = require("path");
 const mongoose = require("mongoose");
+const crypto = require("crypto");
+
 const Confession = require("../models/confession.js");
-const { myUsername, myPassword } = process.env;
+const https = require("https");
 
 const rateLimit = {};
 
@@ -26,57 +28,115 @@ function rateLimitMiddleware(req, res, next) {
 }
 
 app.post("/submit", rateLimitMiddleware, (req, res) => {
-  const { confession, nickname } = req.body;
+  const confession = req.body.confession;
+  const nickname = req.body.nickname;
+  const gRecaptchaResponse = req.body['g-recaptcha-response'];
 
-  if (!confession) {
-    return res.status(400).json({ error: "Confession text is required" });
-  }
+  // Validate the reCAPTCHA response
+  const secretKey = "6Lctj88pAAAAAGyzTC_8J8qN-VLy_ST-EZnk0-dh";
+  const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+  const formData = `secret=${secretKey}&response=${gRecaptchaResponse}`;
 
-  const newConfession = new Confession({
-    confession: confession,
-    nickname: nickname,
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Length": Buffer.byteLength(formData),
+    },
+  };
+
+  const request = https.request(verifyUrl, options, (response) => {
+    let data = "";
+    response.on("data", (chunk) => {
+      data += chunk;
+    });
+    response.on("end", () => {
+      const jsonData = JSON.parse(data);
+      if (!jsonData.success) {
+        return res.status(400).json({ error: "Invalid reCAPTCHA response" });
+      }
+
+      // If the reCAPTCHA response is valid, proceed with the rest of the code
+      const newConfession = new Confession({
+        confession: confession,
+        nickname: nickname,
+      });
+
+      newConfession
+      .save()
+      .then((confession) => {
+          res.redirect(
+            "/api/submitted?confession=" +
+              encodeURIComponent(JSON.stringify(confession)),
+          );
+        })
+      .catch((err) => {
+          console.error(err);
+          res
+          .status(500)
+          .json({ error: "An error occurred while saving the confession" });
+        });
+    });
   });
 
-  newConfession
-    .save()
-    .then((confession) => {
-      res.redirect(
-        "/api/submitted?confession=" +
-          encodeURIComponent(JSON.stringify(confession)),
-      ); // Redirect to the /submitted route with the confession data
-    })
-    .catch((err) => {
-      console.error(err);
-      res
-        .status(500)
-        .json({ error: "An error occurred while saving the confession" });
-    });
+  request.write(formData);
+  request.end();
 });
-
 app.get("/submitted", (req, res) => {
   // Retrieve the confession data from the query string
   const confession = JSON.parse(decodeURIComponent(req.query.confession));
 
-  res.render("submission", { confession: confession }); // Render the submitted template with the confession data
+  // Generate an encrypted confession code
+  const encryptedConfessionCode = encryptConfessionCode(confession._id);
+
+  res.render("submission", { confession: confession, encryptedConfessionCode }); // Render the submitted template with the confession data and encrypted confession code
 });
 
-app.get("/submitted", (req, res) => {
-  res.render("submission", { confessions: confessions });
-});
+function encryptConfessionCode(confessionId) {
+  const cipher = crypto.createCipher("aes-256-cbc", process.env.SECRET_KEY);
+  let encrypted = cipher.update(confessionId.toString(), "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return encrypted;
+}
+
+//...
 
 app.post("/deleteconf", (req, res) => {
-  const confessionId = req.body.objectId; // Get the confession ID from the URL parameter
+  const encryptedConfessionId = req.body.objectId; // Get the encrypted confession ID from the request body
+
+  // Decrypt the confession ID
+  const confessionId = decryptConfessionCode(encryptedConfessionId);
+
+  // Log the confessionId value
+  console.log("Confession ID:", confessionId);
 
   // Find and delete the confession by ID
   Confession.findByIdAndDelete(confessionId)
-    .then(() => {
+  .then(() => {
       res.redirect("/static/deleted");
     })
-    .catch((err) => {
+  .catch((err) => {
       console.error(err);
       res.redirect("/static/err400");
     });
 });
+//...
+
+function decryptConfessionCode(encryptedId) {
+  const decipher = crypto.createDecipher("aes-256-cbc", process.env.SECRET_KEY);
+  let decrypted = "";
+
+  try {
+    decrypted = decipher.update(encryptedId, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+  } catch (err) {
+    console.error("Decryption error:", err);
+    return null;
+  }
+
+  return decrypted;
+}
+
 app.post("/delete/:id", async (req, res) => {
   try {
     const confessionId = req.params.id;
@@ -88,7 +148,7 @@ app.post("/delete/:id", async (req, res) => {
       return res.status(404).json({ message: "Confession not found" });
     }
 
-    res.redirect("/panel/cred123456/admin");
+    res.redirect("/bin/cementglazeddoughnuts/adminpanel");
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });

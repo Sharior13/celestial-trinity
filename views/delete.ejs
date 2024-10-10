@@ -5,7 +5,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Delete Confession | Celestial Trinity</title>
-<link rel="stylesheet" type="text/css" href="stylesDelete.css">
 
 <link rel="icon" href="/assets/favicon.ico" type="image/x-icon"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
@@ -14,21 +13,36 @@
 </head>
 <body>
   
-<!-- Navigation Bar -->
-<section>
-  <header class="header">
-    <div id="menu-btn" class="fas fa-bars"></div>
-    <a href="/" class="logo nav-item" id="logo">
-      <img src="/assets/1.png" width="50px" height="50px" /> Trinity
-      Confession</a>
-    <nav class="navbar" id="navbar">
-      <a href="/" class="nav-item">Home</a>
-      <a href="/feed" class="nav-item">Confessions</a>
-      <a href="/talents" class="nav-item">Talents</a>
-      <a href="/deleteconfession" class="nav-item">Delete Confession</a>
-    </nav>
-  </header>
-</section>
+  <!-- Navigation Bar -->
+  <section>
+    <header class="header">
+      <div id="menu-btn" class="fas fa-bars"></div>
+      <a href="/" class="logo nav-item" id="logo">
+        <img src="/assets/1.png" width="50px" height="50px" /> Trinity
+        Confession</a>
+        <div class="checkbox-small">
+          <input type="checkbox" class="checkbox" id="chks" />
+          <label class="label" for="chks">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <div class="ball"></div>
+          </label>
+        </div>
+      <nav class="navbar" id="navbar">
+        <a href="/" class="nav-item">Home</a>
+        <a href="/feed" class="nav-item">Confessions</a>
+        <a href="/deleteconfession" class="nav-item">Delete Confession</a>
+        <div class="checkbox-big nav-item">
+          <input type="checkbox" class="checkbox" id="chkl" />
+          <label class="label" for="chkl">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <div class="ball"></div>
+          </label>
+        </div>
+      </nav>
+    </header>
+  </section>
 
 
 <!-- Body -->
@@ -61,22 +75,6 @@
           </p>
         </div>
       </section>
-  
-<!-- Script for sidebar -->  
-      <script>
-        let menu = document.querySelector("#menu-btn");
-        let navbar = document.querySelector(".navbar");
-
-        menu.onclick = () => {
-          menu.classList.toggle("fa-times");
-          navbar.classList.toggle("active");
-        };
-
-        window.onscroll = () => {
-          menu.classList.remove("fa-times");
-          navbar.classList.remove("active");
-        };
-      </script>
-  
+  <script src="/static/scriptPage.js"></script>
 </body>
 </html>

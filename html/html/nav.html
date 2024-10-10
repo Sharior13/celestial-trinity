@@ -20,11 +20,26 @@
         <a href="/" class="logo nav-item" id="logo">
           <img src="/assets/1.png" width="50px" height="50px" /> Trinity
           Confession</a>
+          <div class="checkbox-small">
+            <input type="checkbox" class="checkbox" id="chks" />
+            <label class="label" for="chks">
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun"></i>
+              <div class="ball"></div>
+            </label>
+          </div>
         <nav class="navbar" id="navbar">
           <a href="/" class="nav-item">Home</a>
           <a href="/feed" class="nav-item">Confessions</a>
-          <a href="/talents" class="nav-item">Talents</a>
           <a href="/deleteconfession" class="nav-item">Delete Confession</a>
+          <div class="checkbox-big nav-item">
+            <input type="checkbox" class="checkbox" id="chkl" />
+            <label class="label" for="chkl">
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun"></i>
+              <div class="ball"></div>
+            </label>
+          </div>
         </nav>
       </header>
     </section>
@@ -65,6 +80,27 @@
         navbar.classList.remove("active");
       };
     </script>
+<!-- Script for dark mode -->
+    <script>
+      const chkl = document.getElementById('chkl');
+      const chks = document.getElementById('chks');
+      const header = document.querySelector('.header');
+      const footer = document.querySelector('.footer');
+
+    chkl.addEventListener('change', () => {
+    document.body.classList.toggle('dark');
+    header.classList.toggle('dark');
+    footer.classList.toggle('dark');
+
+    });
+
+    chks.addEventListener('change', () => {
+    document.body.classList.toggle('dark');
+    header.classList.toggle('dark');
+    footer.classList.toggle('dark');
+            });
+    </script>
+
     
   </body>
 </html>
